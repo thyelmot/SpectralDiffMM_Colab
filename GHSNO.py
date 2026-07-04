@@ -18,9 +18,13 @@ class GHSNO(nn.Module):
         
     def forward(self, adj, embeds_list):
         """
-        embeds_list: list of tensors of shape (N, D), length = num_bands
+        embeds_list: list of tensors of shape (N, D), length = num_bands, OR a single tensor (N, D)
         adj: Sparse adjacency matrix (N, N)
         """
+        if isinstance(embeds_list, torch.Tensor):
+            # Fallback to standard GCN behavior for individual modality processing in CL
+            return torch.spmm(adj, embeds_list)
+
         # Stack modalities as bands
         x_bands = torch.stack(embeds_list, dim=1) # (N, num_bands, D)
         
