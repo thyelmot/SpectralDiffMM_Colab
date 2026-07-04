@@ -94,7 +94,12 @@ class DataHandler:
 
         if args.model_type == 'spectral_diffmm':
             print("Computing Spectral Laplacian...")
-            self.laplacian = SpectralUtils.compute_laplacian(trnMat)
+            # Create user-user adjacency matrix for spectral filtering over users
+            user_adj = trnMat.dot(trnMat.transpose())
+            user_adj.setdiag(0)
+            user_adj.eliminate_zeros()
+            
+            self.laplacian = SpectralUtils.compute_laplacian(user_adj)
             self.torchLaplacian = SpectralUtils.scipy_sparse_to_torch(self.laplacian)
             print("Computing Spectral Bands...")
             full_signal = torch.FloatTensor(self.trnMat.toarray()).to(device)
